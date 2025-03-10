@@ -1,19 +1,26 @@
-// import { reactive } from './reactive/reactive';
-// import { effect } from './reactive/effective';
-import { ref } from './reactive/ref';
-import { computed } from './reactive/computed';
+import { render } from './runtime/render';
+import { h, Text } from './runtime/vnode';
 
-// const observed = window.observed = reactive({ count: 0 });
-// effect(() => {
-//   console.log("observed.count is ", observed.count);
-// });
-// const foo = window.foo = ref(1);
-// effect(() => {
-//   console.log("foo.value is ", foo.value);
-// });
+const vnode = h(
+  'div',
+  {
+    class: 'a b',
+    style: {
+      border: '1px solid',
+      fontSize: '14px',
+    },
+    onClick: () => console.log('click'),
+    checked: '',
+    custom: false,
+  },
+  [
+    h('ul', null, [
+      h('li', { style: { color: 'red' } }, 1),
+      h('li', null, 2),
+      h('li', { style: { color: 'blue' } }, 3),
+      h('li', null, [h(Text, null, 'hello world')]),
+    ]),
+  ]
+);
 
-const num = (window.num = ref(0));
-const c = (window.c = computed(()=> {
-  console.log('calculate c value');
-  return num.value * 2;
-}));
+render(vnode, document.body);

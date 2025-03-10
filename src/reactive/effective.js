@@ -5,7 +5,7 @@ export function effect(fn, options = {}){
     try {
       activeEffect = effectFn;
       effectStack.push(activeEffect);
-      return fn();
+      return fn;
     } finally {
       // todo
       effectStack.pop();
