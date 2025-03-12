@@ -1,26 +1,25 @@
 import { render } from './runtime/render';
-import { h, Text } from './runtime/vnode';
+import { h, Text, Fragment } from './runtime/vnode';
+render(
+  h('ul', null, [
+    h('li', null, 'first'),
+    h(Fragment, null, [
 
-const vnode = h(
-  'div',
-  {
-    class: 'a b',
-    style: {
-      border: '1px solid',
-      fontSize: '14px',
-    },
-    onClick: () => console.log('click'),
-    checked: '',
-    custom: false,
-  },
-  [
-    h('ul', null, [
-      h('li', { style: { color: 'red' } }, 1),
-      h('li', null, 2),
-      h('li', { style: { color: 'blue' } }, 3),
-      h('li', null, [h(Text, null, 'hello world')]),
     ]),
-  ]
-);
+    h('li', null, 'last')
+  ]),
+  document.body
+)
+setTimeout(() => {
+  render(
+    h('ul', null, [
+      h('li', null, 'first'),
+      h(Fragment, null, [
 
-render(vnode, document.body);
+        h('li', null, 'middle')
+      ]),
+      h('li', null, 'last')
+    ]),
+    document.body
+  )
+}, 2000);
