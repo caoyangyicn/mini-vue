@@ -24,7 +24,6 @@ function patch(prevVNode, vnode, container, anchor = null) {
     prevVNode = null;
   }
   const { shapeFlag } = vnode;
-
   if(shapeFlag & ShapeFlags.COMPONENT){
     processComponent(prevVNode, vnode, container, anchor);
   } else if(shapeFlag & ShapeFlags.TEXT){
@@ -105,6 +104,7 @@ function patchChildren(prevVNode, vnode, container, anchor) {
     }
   }
 }
+
 function patchElement(prevVNode, vnode) {
   vnode.el = prevVNode.el;
   patchProps(prevVNode.props, vnode.props, vnode.el);
@@ -112,7 +112,7 @@ function patchElement(prevVNode, vnode) {
 }
 
 function unmountFragement(vNode) {
-// todo
+  // todo
   let { el: cur, anchor: end } = vNode;
   const parent = cur.parentNode;
   while(cur !== end){
