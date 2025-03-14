@@ -11,7 +11,6 @@ export function render(vnode, container){
   }else {
     patch(prevVNode, vnode, container);
   }
-  mount(vnode, container);
   container._vnode = vnode;
 }
 
@@ -21,10 +20,12 @@ function isSameVnode(prevVNode, vnode) {
 
 function patch(prevVNode, vnode, container, anchor = null) {
   if(prevVNode && !isSameVnode(prevVNode, vnode)){
+    anchor = (prevVNode.anchor || prevVNode.el).nextSibling;
     unmount(prevVNode);
     prevVNode = null;
   }
   const { shapeFlag } = vnode;
+
   if(shapeFlag & ShapeFlags.COMPONENT){
     processComponent(prevVNode, vnode, container, anchor);
   } else if(shapeFlag & ShapeFlags.TEXT){
@@ -48,7 +49,7 @@ function unmount(vNode) {
   }
 }
 
-function processElement(prevVNode, vnode, container, anchor) {
+function processElement(prevVNode, vnode, container, anchor = null) {
   if(prevVNode){
     patchElement(prevVNode, vnode, container);
   } else {
@@ -83,18 +84,18 @@ function patchChildren(prevVNode, vnode, container, anchor) {
   const {shapeFlag, children} = vnode;
   if(shapeFlag & shapeFlags.TEXT_CHILDREN){
     if(prevShapeFlag & shapeFlags.TEXT_CHILDREN){
-      container.textContent = vnode.textContent;
-    } else if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
+      container.textContent = children;
+    } else if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN){
       unmountChildren(prevChildren);
-      container.textContent = vnode.textContent;
+      container.textContent = children;
     } else {
-      container.textContent = vnode.textContent;
+      container.textContent = children;
     }
-  } else if(shapeFlags & shapeFlags.ARRAY_CHILDREN){
+  } else if(shapeFlag & shapeFlags.ARRAY_CHILDREN){
     if(prevShapeFlag & shapeFlags.TEXT_CHILDREN){
       container.textContent = '';
       mountChildren(children, container, anchor);
-    } else if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
+    } else if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN){
       patchArrayChildren(prevChildren, children, container, anchor);
     } else {
       mountChildren(children, container, anchor);
@@ -102,8 +103,8 @@ function patchChildren(prevVNode, vnode, container, anchor) {
   } else {
     if(prevShapeFlag & shapeFlags.TEXT_CHILDREN){
       container.textContent = '';
-    } else if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
-      mountChildren(children, container, anchor);
+    } else if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN){
+      unmountChildren(prevChildren);
     }
   }
 }
@@ -158,42 +159,23 @@ function processFragment(prevVNode, vnode, container, anchor = null) {
   }
 }
 
-
-function mount(vnode, container){
-  const { shapeFlag } = vnode;
-  if(shapeFlag & ShapeFlags.ELEMENT){
-    mountElement(vnode, container);
-  } else if(shapeFlag & ShapeFlags.TEXT){
-    mountText(vnode, container);
-  } else if(shapeFlag & ShapeFlags.FRAGMENT){
-    mountFragment(vnode, container);
-  } else if(shapeFlag & ShapeFlags.COMPONENT){
-    mountComponent(vnode, container);
-  }
-}
-
-
-
-
 function mountElement(vnode, container, anchor = null){
-  const { type, props, shapeFlag, child } = vnode;
+  const { type, props, shapeFlag, children } = vnode;
   const el = document.createElement(type);
-  // mountProps(el, props);
   patchProps(null, props, el);
 
   if(shapeFlag & ShapeFlags.TEXT_CHILDREN){
-    mountText(vnode, container);
-  } else if(shapeFlag & ShapeFlags.FRAGMENT){
-    mountChildren(child, container);
+    mountText(vnode, el);
+  } else if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
+    mountChildren(children, el);
   }
-  // container.appendChild(el);
   container.insertBefore(el, anchor);
   vnode.el = el;
 }
 
-function mountText(vnode, container) {
+function mountText(vnode, container, anchor =null) {
   const textNode = document.createTextNode(vnode.children);
-  container.appendChild(textNode);
+  container.insertBefore(textNode, anchor);
   vnode.el = textNode;
 }
 function mountFragment(vnode, container) {

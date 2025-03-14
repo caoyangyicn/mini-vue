@@ -13,7 +13,7 @@ export function patchProps(preProps, props, el) {
     }
   }
   for(const key in preProps){
-    if(props[key] === null){
+    if(key !== 'key' && props[key] == null){
       patchDomProp(preProps[key], null, key, el);
     }
   }
