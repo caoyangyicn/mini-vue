@@ -141,12 +141,14 @@ function processText(prevVNode, vnode, container, anchor =null) {
 }
 
 function processFragment(prevVNode, vnode, container, anchor = null) {
-  const fragmentStartAnchor = document.createTextNode('');
-  const fragmentEndAnchor = document.createTextNode('');
-  vnode.el = prevVNode? prevVNode.el: fragmentStartAnchor;
-  vnode.anchor = prevVNode? prevVNode.anchor: fragmentEndAnchor;
+  const preText = document.createTextNode('');
+  const endText = document.createTextNode('');
+  vnode.el = prevVNode? prevVNode.el: preText;
+  vnode.anchor = prevVNode? prevVNode.anchor: endText;
+  const fragmentStartAnchor = vnode.el;
+  const fragmentEndAnchor = vnode.anchor;
   if(prevVNode){
-    patchChildren(prevVNode, vnode, container, anchor);
+    patchChildren(prevVNode, vnode, container, fragmentEndAnchor);
   } else {
     container.insertBefore(fragmentStartAnchor, anchor);
     container.insertBefore(fragmentEndAnchor, anchor);
