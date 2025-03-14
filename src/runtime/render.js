@@ -1,6 +1,5 @@
-import { isBoolean } from '../utils';
 import { ShapeFlag as shapeFlags, ShapeFlag as ShapeFlags } from './vnode';
-import { patchProps, domPropsRE } from './patchProps';
+import { patchProps } from './patchProps';
 
 export function render(vnode, container){
   let prevVNode = container._vnode;
@@ -35,7 +34,6 @@ function patch(prevVNode, vnode, container, anchor = null) {
   } else {
     processElement(prevVNode, vnode, container, anchor);
   }
-
 }
 
 function unmount(vNode) {
@@ -56,7 +54,6 @@ function processElement(prevVNode, vnode, container, anchor = null) {
     mountElement(vnode, container, anchor);
   }
 }
-
 
 function unmountChildren(prevChildren) {
   prevChildren.forEach((vnode) => {
@@ -125,7 +122,6 @@ function unmountFragement(vNode) {
   }
 }
 
-
 function unmountComponent(vNode) {
 // todo
 
@@ -134,7 +130,6 @@ function unmountComponent(vNode) {
 function processComponent(prevVNode, vnode, shapeFlag, anchor = null) {
 
 }
-
 
 function processText(prevVNode, vnode, container, anchor =null) {
   if(prevVNode){
@@ -178,13 +173,6 @@ function mountText(vnode, container, anchor =null) {
   container.insertBefore(textNode, anchor);
   vnode.el = textNode;
 }
-function mountFragment(vnode, container) {
-  mountChildren(vnode, container);
-}
-
-function mountComponent(vnode, container){
-
-}
 
 function mountChildren(vnode, container, anchor) {
   vnode.forEach(child => {
@@ -192,34 +180,5 @@ function mountChildren(vnode, container, anchor) {
   })
 }
 
-function mountProps(el, props) {
-  for(let key in props){
-    let value = props[key];
-    switch (key){
-      case 'class':
-        el.className = value;
-        break;
-      case 'style':
-        for(let styleName in value){
-          el.style[styleName] = value[styleName];
-        }
-        break;
-      default:
-        if(key[0] === 'o' && key[1] === 'n'){
-          el.addEventListener(key.slice(2).toLowerCase(), value);
-        }else if(domPropsRE.test(key)){
-          if(value === '' && isBoolean(el[key])){
-            value = true;
-          }
-        } else {
-          if(value == null || value === false){
-            el.removeAttribute(key);
-          }else {
-            el.setAttribute(key, value);
-          }
-        }
-        break;
-    }
-  }
-}
+
 
