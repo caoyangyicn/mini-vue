@@ -60,7 +60,7 @@ function unmountChildren(prevChildren) {
   });
 }
 
-function patchArrayChildren(prevChildren, children, container, anchor = null) {
+function patchUnkeyedChildren(prevChildren, children, container, anchor = null) {
   const oldLength = prevChildren.length;
   const newLength = children.length;
   const commonLength = Math.min(oldLength, newLength);
@@ -75,6 +75,114 @@ function patchArrayChildren(prevChildren, children, container, anchor = null) {
   }
 }
 
+// function patchKeyedChildren(prevChildren, children, container, anchor){
+//   let maxNewIndexSoFar = 0;
+//   const map = new Map();
+//   prevChildren.forEach((child, index) => {
+//     map.set(child.key, {child, index});
+//   });
+//   for(let i = 0; i < children.length; i++) {
+//     const child = children[i];
+//     const curAnchor = i === 0? prevChildren[0].el: children[i - 1].el.nextSibling;
+//     if(map.has(child.key)){
+//       const { prev, j } = map.get(child.key);
+//       patch(prev, child, container, anchor);
+//       if(j < maxNewIndexSoFar) {
+//         container.insertBefore(child.el, curAnchor);
+//       } else {
+//         maxNewIndexSoFar = j;
+//       }
+//       map.delete(child.key);
+//     } else {
+//       patch(null, child, container, curAnchor);
+//     }
+//   }
+//   map.forEach(({ prev }) => {unmount(prev)});
+// }
+function patchKeyedChildren(prevChildren, children, container, anchor){
+  let i = 0;
+  let epre = prevChildren.length - 1;
+  let npre = children.length - 1;
+  while(i <= epre && i <= npre && prevChildren[i].key === children[i].key) {
+    patch(prevChildren[epre], children[npre], container, anchor);
+    i++;
+  }
+  while(i <= epre && i <= npre && prevChildren[epre].key === children[npre].key) {
+    patch(prevChildren[epre], children[npre], container, anchor);
+    epre--;
+    npre--;
+  }
+
+  if(i > epre){
+    for(let j = i; j <= npre; j++){
+      const next = j + 1 <= npre? children[npre + 1].el: anchor;
+      patch(null, children[j], container, next);
+    }
+  }else if(i > npre){
+    for(let j = i; j <= epre; j++){
+      unmount(prevChildren[j]);
+    }
+  }else {
+    let maxNewIndexSoFar = 0;
+    let move = false;
+    const map = new Map();
+    const toMounted = [];
+    prevChildren.forEach((child, index) => {
+      map.set(child.key, {child, index});
+    });
+
+    const source = new Array(npre -i + 1).fill(-1);
+    for(let k = 0; k < children.length; k++) {
+      const child = children[i];
+      const curAnchor = i === 0? prevChildren[0].el: children[i - 1].el.nextSibling;
+      if(map.has(child.key)){
+        const { prev, j } = map.get(child.key);
+        patch(prev, child, container, anchor);
+        if(j < maxNewIndexSoFar) {
+          move = true;
+          // container.insertBefore(child.el, curAnchor);
+        } else {
+          maxNewIndexSoFar = j;
+        }
+        source[k] = j;
+        map.delete(child.key);
+      } else {
+        toMounted.push(k + i);
+        // patch(null, child, container, curAnchor);
+      }
+    }
+    map.forEach(({ prev }) => {unmount(prev)});
+    if(move){
+      const seq = getSquence();
+      let j = seq.length - 1;
+      for(let k = seq.length - 1; k > 0; k--) {
+        if(seq[j] === k){
+          j--;
+        } else {
+          const pos = k + i;
+          const nextPos = pos + 1;
+          const curAnchor = (children[nextPos] && children[nextPos].el) || anchor;
+          if(source[k] === -1){
+            patch(null, children[pos], container, anchor,curAnchor);
+          } else {
+            container.insertBefore(children[pos].el, curAnchor);
+          }
+        }
+
+      }
+    } else if(toMounted.length > 0){
+      for(let k = toMounted.length; k > 0; k--){
+        const pos = toMounted[k];
+        const nextPos = pos + 1;
+        const curAnchor = (children[nextPos] && children[nextPos].el) || anchor;
+        patch(null, children[pos], container, anchor,curAnchor);
+      }
+    }
+  }
+}
+function getSquence(){
+
+}
 function patchChildren(prevVNode, vnode, container, anchor) {
   const { shapeFlag: prevShapeFlag, children: prevChildren} = prevVNode;
   const {shapeFlag, children} = vnode;
@@ -92,7 +200,11 @@ function patchChildren(prevVNode, vnode, container, anchor) {
       container.textContent = '';
       mountChildren(children, container, anchor);
     } else if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN){
-      patchArrayChildren(prevChildren, children, container, anchor);
+      if(prevChildren[0] &&prevChildren[0].key != null && children[0] && children[0].key != null){
+        patchKeyedChildren(prevChildren, children, container, anchor);
+      } else {
+        patchUnkeyedChildren(prevChildren, children, container, anchor);
+      }
     } else {
       mountChildren(children, container, anchor);
     }
