@@ -207,6 +207,7 @@ function unmountFragement(vNode) {
     parent.removeChild(cur);
     cur = next;
   }
+  parent.removeChild(end);
 }
 
 function unmountComponent(vNode) {

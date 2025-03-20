@@ -28,19 +28,23 @@ export function patchDomProp(prev, next, key, el) {
       el.className = next || '';
       break;
     case 'style':
-      for(let styleName in next){
-        el.style[styleName] = next[styleName];
-      }
-      if(prev){
-        for(const styleName in prev){
-          if(!next[styleName]){
-            el.style[styleName] = '';
+      if (!next) {
+        el.removeAttribute('style');
+      } else {
+        for(let styleName in next){
+          el.style[styleName] = next[styleName];
+        }
+        if(prev){
+          for(const styleName in prev){
+            if(next[styleName] == null){
+              el.style[styleName] = '';
+            }
           }
         }
       }
       break;
     default:
-      if(key[0] === 'o' && key[1] === 'n'){
+      if(/^on[^a-z]/.test(key)){
         const eventName = key.slice(2).toLowerCase();
         if(prev){
           el.removeEventListener(eventName, prev);
@@ -48,10 +52,11 @@ export function patchDomProp(prev, next, key, el) {
         if(next){
           el.addEventListener(eventName, next);
         }
-      }else if(domPropsRE.test(key)){
+      } else if(domPropsRE.test(key)){
         if(next === '' && isBoolean(el[key])){
           next = true;
         }
+        el[key] = next;
       } else {
         if(next == null || next === false){
           el.removeAttribute(key);
