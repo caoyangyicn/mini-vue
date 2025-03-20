@@ -75,30 +75,6 @@ function patchUnkeyedChildren(prevChildren, children, container, anchor = null) 
   }
 }
 
-// function patchKeyedChildren(prevChildren, children, container, anchor){
-//   let maxNewIndexSoFar = 0;
-//   const map = new Map();
-//   prevChildren.forEach((child, index) => {
-//     map.set(child.key, {child, index});
-//   });
-//   for(let i = 0; i < children.length; i++) {
-//     const child = children[i];
-//     const curAnchor = i === 0? prevChildren[0].el: children[i - 1].el.nextSibling;
-//     if(map.has(child.key)){
-//       const { prev, j } = map.get(child.key);
-//       patch(prev, child, container, anchor);
-//       if(j < maxNewIndexSoFar) {
-//         container.insertBefore(child.el, curAnchor);
-//       } else {
-//         maxNewIndexSoFar = j;
-//       }
-//       map.delete(child.key);
-//     } else {
-//       patch(null, child, container, curAnchor);
-//     }
-//   }
-//   map.forEach(({ prev }) => {unmount(prev)});
-// }
 function patchKeyedChildren(prevChildren, children, container, anchor){
   let i = 0;
   let epre = prevChildren.length - 1;
@@ -138,13 +114,11 @@ function patchKeyedChildren(prevChildren, children, container, anchor){
     const source = new Array(npre -i + 1).fill(-1);
     for(let k = 0; k < children.length; k++) {
       const child = children[i];
-      const curAnchor = i === 0? prevChildren[0].el: children[i - 1].el.nextSibling;
       if(map.has(child.key)){
         const { prev, j } = map.get(child.key);
         patch(prev, child, container, anchor);
         if(j < maxNewIndexSoFar) {
           move = true;
-          // container.insertBefore(child.el, curAnchor);
         } else {
           maxNewIndexSoFar = j;
         }
@@ -152,7 +126,6 @@ function patchKeyedChildren(prevChildren, children, container, anchor){
         map.delete(child.key);
       } else {
         toMounted.push(k + i);
-        // patch(null, child, container, curAnchor);
       }
     }
     map.forEach(({ prev }) => {unmount(prev)});
