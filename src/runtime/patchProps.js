@@ -6,6 +6,9 @@ export function patchProps(preProps, props, el) {
   preProps = preProps || {};
   props = props || {};
   for(let key in props){
+    if(key === 'key') {
+      continue;
+    }
     const prev = preProps[key];
     const next = props[key];
     if(prev !== next){

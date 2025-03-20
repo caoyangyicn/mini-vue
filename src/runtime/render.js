@@ -126,6 +126,10 @@ function patchKeyedChildren(prevChildren, children, container, anchor){
     let maxNewIndexSoFar = 0;
     let move = false;
     const map = new Map();
+    for(let j = i; j <= epre; j++){
+      const prev = prevChildren[j];
+      map.set(prev.key, {prev, j});
+    }
     const toMounted = [];
     prevChildren.forEach((child, index) => {
       map.set(child.key, {child, index});
@@ -153,7 +157,7 @@ function patchKeyedChildren(prevChildren, children, container, anchor){
     }
     map.forEach(({ prev }) => {unmount(prev)});
     if(move){
-      const seq = getSquence();
+      const seq = getSquence(source);
       let j = seq.length - 1;
       for(let k = seq.length - 1; k > 0; k--) {
         if(seq[j] === k){
@@ -180,9 +184,7 @@ function patchKeyedChildren(prevChildren, children, container, anchor){
     }
   }
 }
-function getSquence(){
 
-}
 function patchChildren(prevVNode, vnode, container, anchor) {
   const { shapeFlag: prevShapeFlag, children: prevChildren} = prevVNode;
   const {shapeFlag, children} = vnode;
@@ -293,6 +295,43 @@ function mountChildren(vnode, container, anchor) {
       patch(null, child, container, anchor);
   })
 }
+var getSquence = function (nums) {
+  const arr = [nums[0]];
+  const position = [0];
+  for (let i = 1; i < nums.length; i++) {
+    if (nums[i] === -1) {
+      continue;
+    }
+    if (nums[i] > arr[arr.length - 1]) {
+      arr.push(nums[i]);
+      position.push(arr.length - 1);
+    } else {
+      let l = 0,
+        r = arr.length - 1;
+      while (l <= r) {
+        let mid = ~~((l + r) / 2);
+        if (nums[i] > arr[mid]) {
+          l = mid + 1;
+        } else if (nums[i] < arr[mid]) {
+          r = mid - 1;
+        } else {
+          l = mid;
+          break;
+        }
+      }
+      arr[l] = nums[i];
+      position.push(l);
+    }
+  }
+
+  let cur = arr.length - 1;
+  for (let i = position.length - 1; i >= 0 && cur >= 0; i--) {
+    if (position[i] === cur) {
+      arr[cur--] = i;
+    }
+  }
+  return arr;
+};
 
 
 
