@@ -1,5 +1,6 @@
 import { ShapeFlag as shapeFlags, ShapeFlag as ShapeFlags } from './vnode';
 import { patchProps } from './patchProps';
+import { mountComponent } from './component';
 
 export function render(vnode, container){
   let prevVNode = container._vnode;
@@ -215,8 +216,12 @@ function unmountComponent(vNode) {
 
 }
 
-function processComponent(prevVNode, vnode, shapeFlag, anchor = null) {
-
+function processComponent(prevVNode, vnode, container, anchor = null) {
+  if(prevVNode){
+    // todo
+  } else {
+    mountComponent(vnode, container, anchor, patch);
+  }
 }
 
 function processText(prevVNode, vnode, container, anchor =null) {

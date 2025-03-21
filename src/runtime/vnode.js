@@ -1,4 +1,4 @@
-import { isNumeric, isString } from '../utils';
+import { isArray, isNumeric, isObject, isString } from '../utils';
 
 export const ShapeFlag = {
   ELEMENT: 1,
@@ -38,4 +38,14 @@ export function h(type, props, children){
     anchor: null,
     key: props?.key || null,
   }
+}
+
+export function normalizeVnode(result){
+  if(isArray(result)){
+    return h(Fragment, null, result);
+  }
+  if(isObject(result)){
+    return result;
+  }
+  return h(Text, null, result.toString());
 }
