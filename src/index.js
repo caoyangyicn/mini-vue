@@ -1,11 +1,16 @@
 import { render } from './runtime/render';
 import { h } from './runtime/vnode';
 import { ref } from './reactive/ref';
+import { nextTick } from './runtime/scheduler';
+import { createApp } from './runtime';
 
-let Comp= {
+createApp({
   setup(){
     const count = ref(0);
     const add = () => {
+      count.value++;
+      count.value++;
+      count.value++;
       count.value++;
     }
     return {
@@ -15,17 +20,23 @@ let Comp= {
   },
   render(ctx) {
     return [
-      h('div', null, ctx.count.value),
+      h('div', { id: 'div' }, ctx.count.value),
       h(
         'button',
         {
+          id: 'btn',
           onClick: ctx.add,
         },
         'add'
       ),
     ];
   },
-};
+}).mount(document.body);
 
-const vnode = h(Comp);
-render(vnode, document.body);
+const div = document.getElementById('div');
+const btn = document.getElementById('btn');
+console.log(div.innerHTML);
+btn.click();
+nextTick(() => {
+  console.log(div.innerHTML);
+});

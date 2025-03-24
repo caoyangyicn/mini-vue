@@ -1,6 +1,7 @@
 import { normalizeVnode } from './vnode';
 import { reactive } from '../reactive/reactive';
 import { effect } from '../reactive/effective';
+import { queueJob } from './scheduler';
 
 function updateProps(instance, vnode){
   const { props: vnodeProps, type: Component } = vnode;
@@ -25,9 +26,9 @@ function fallTrought(instance, subTree){
   }
 }
 
-export function mountComponent(vnode, container, anchor, patch){
+export function mountComponent(vnode, container, anchor, patch) {
   const { type: Component } = vnode;
-  const instance=(vnode.component = {
+  const instance = (vnode.component = {
     props: null,
     attrs: null,
     setupState: null,
@@ -45,14 +46,14 @@ export function mountComponent(vnode, container, anchor, patch){
   }
 
   instance.update = effect(() => {
-    if(instance.isMounted) {
+    if (instance.isMounted) {
       const prevSubTree = instance.subtree;
-      const subTree= (instance.subtree = normalizeVnode(Component.render(instance.ctx)));
+      const subTree = (instance.subtree = normalizeVnode(Component.render(instance.ctx)));
       fallTrought(instance, subTree);
       patch(prevSubTree, subTree, container, anchor);
       vnode.el = subTree.el;
     } else {
-      if(instance.next){
+      if (instance.next) {
         vnode = instance.next;
         instance.next = null;
         updateProps(instance, vnode);
@@ -62,11 +63,13 @@ export function mountComponent(vnode, container, anchor, patch){
         }
       }
 
-      const subTree= (instance.subtree = normalizeVnode(Component.render(instance.ctx)));
+      const subTree = (instance.subtree = normalizeVnode(Component.render(instance.ctx)));
       fallTrought(instance, subTree);
       patch(null, subTree, container, anchor);
       vnode.el = subTree.el;
       instance.isMounted = true;
     }
+  }, {
+    scheduler: queueJob
   });
 }
