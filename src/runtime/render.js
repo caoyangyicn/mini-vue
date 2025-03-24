@@ -146,7 +146,6 @@ function patchKeyedChildren(prevChildren, children, container, anchor){
             container.insertBefore(children[pos].el, curAnchor);
           }
         }
-
       }
     } else if(toMounted.length > 0){
       for(let k = toMounted.length; k > 0; k--){
@@ -213,12 +212,18 @@ function unmountFragement(vNode) {
 
 function unmountComponent(vNode) {
 // todo
+  unmount(vNode.component.subtree);
+}
 
+function updateComponent(prevVNode, vnode) {
+  vnode.component = prevVNode.component;
+  vnode.component.next =vnode;
+  vnode.component.update();
 }
 
 function processComponent(prevVNode, vnode, container, anchor = null) {
   if(prevVNode){
-    // todo
+    updateComponent(prevVNode, vnode);
   } else {
     mountComponent(vnode, container, anchor, patch);
   }

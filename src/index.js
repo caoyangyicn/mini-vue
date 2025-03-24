@@ -1,25 +1,31 @@
 import { render } from './runtime/render';
-import { h, Fragment } from './runtime/vnode';
+import { h } from './runtime/vnode';
+import { ref } from './reactive/ref';
 
-render(
-  h('ul', null, [
-    h('li', null, 'first'),
-    h(Fragment, null, [
-    ]),
-    h('li', null, 'last')
-  ]),
-  document.body
-)
+let Comp= {
+  setup(){
+    const count = ref(0);
+    const add = () => {
+      count.value++;
+    }
+    return {
+      count,
+      add
+    };
+  },
+  render(ctx) {
+    return [
+      h('div', null, ctx.count.value),
+      h(
+        'button',
+        {
+          onClick: ctx.add,
+        },
+        'add'
+      ),
+    ];
+  },
+};
 
-setTimeout(() => {
-  render(
-    h('ul', null, [
-      h('li', null, 'first'),
-      h(Fragment, null, [
-        h('li', null, 'middle')
-      ]),
-      h('li', null, 'last')
-    ]),
-    document.body
-  )
-}, 2000);
+const vnode = h(Comp);
+render(vnode, document.body);
