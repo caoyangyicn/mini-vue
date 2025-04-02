@@ -1,6 +1,5 @@
 import { normalizeVnode } from './vnode';
-import { reactive } from '../reactive/reactive';
-import { effect } from '../reactive/effective';
+import { effect, reactive } from '../reactive';
 import { queueJob } from './scheduler';
 
 function updateProps(instance, vnode){

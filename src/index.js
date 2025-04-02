@@ -1,42 +1,47 @@
-import { render } from './runtime/render';
-import { h } from './runtime/vnode';
-import { ref } from './reactive/ref';
-import { nextTick } from './runtime/scheduler';
-import { createApp } from './runtime';
+import { parse } from './compiler/parse';
 
-createApp({
-  setup(){
-    const count = ref(0);
-    const add = () => {
-      count.value++;
-      count.value++;
-      count.value++;
-      count.value++;
-    }
-    return {
-      count,
-      add
-    };
-  },
-  render(ctx) {
-    return [
-      h('div', { id: 'div' }, ctx.count.value),
-      h(
-        'button',
-        {
-          id: 'btn',
-          onClick: ctx.add,
-        },
-        'add'
-      ),
-    ];
-  },
-}).mount(document.body);
+console.log(JSON.stringify(parse(`<div id="foo" v-if="ok">hello {{ name }}</div>`)));
 
-const div = document.getElementById('div');
-const btn = document.getElementById('btn');
-console.log(div.innerHTML);
-btn.click();
-nextTick(() => {
-  console.log(div.innerHTML);
-});
+/**
+
+ {
+ "type": "ROOT",
+ "children": [
+ {
+ "type": "ELEMENT",
+ "tag": "div",
+ "tagType": "ELEMENT",
+ "props": [
+ {
+ "type": "ATTRIBUTE",
+ "name": "id",
+ "value": { "type": "TEXT", "content": "foo" }
+ }
+ ],
+ "directives": [
+ {
+ "type": "DIRECTIVE",
+ "name": "if",
+ "exp": {
+ "type": "SIMPLE_EXPRESSION",
+ "content": "ok",
+ "isStatic": false
+ }
+ }
+ ],
+ "isSelfClosing": false,
+ "children": [
+ { "type": "TEXT", "content": "hello " },
+ {
+ "type": "INTERPOLATION",
+ "content": {
+ "type": "SIMPLE_EXPRESSION",
+ "isStatic": false,
+ "content": "name"
+ }
+ }
+ ]
+ }
+ ]
+ }
+ */
