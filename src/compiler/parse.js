@@ -42,7 +42,7 @@ function parseInterpolation(context) {
   advanceBy(context, close.length);
   context.source.trim();
   return {
-    type: NodeTypes.INTERPOLATE,
+    type: NodeTypes.INTERPOLATION,
     content: {
       type: NodeTypes.SIMPLE_EXPRESSION,
       content: content,
@@ -75,9 +75,7 @@ function parseTag(context){
   const tag = match[1];
   advanceBy(context, match[0].length);
   advanceSpaces(context);
-  console.log('context.source', context.source);
   const{props, directives } = parseAttributes(context);
-
   const isSelfClosing = context.source.startsWith('/>');
   advanceBy(context, isSelfClosing? 2: 1);
   const tagType = isComponent(tag, context)? ElementTypes.COMPONENT : ElementTypes.Element;
@@ -115,19 +113,18 @@ function parseAttribute(context) {
     advanceSpaces(context);
   }
 
-
   //// Directive
   if(/^(:|@|v-)/.test(name)){
     let dirName, argContent;
+
     if(name[0]===":"){
       dirName ='bind';
-      argContent = context.source.slice(1);
+      argContent = name.slice(1);
     } else if(name[0]==="@"){
-        dirName = 'on';
-        argContent = context.source.slice(1);
+      dirName = 'on';
+      argContent = name.slice(1);
     } else if(name.startsWith('v-')){
       [dirName, argContent] = name.slice(2).split(':');
-
     }
     return {
       type: NodeTypes.DIRECTIVE,

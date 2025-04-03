@@ -4,6 +4,7 @@ import { mountComponent } from './component';
 
 export function render(vnode, container){
   let prevVNode = container._vnode;
+
   if(!vnode) {
     if(prevVNode){
       unmount(prevVNode);
@@ -25,6 +26,7 @@ function patch(prevVNode, vnode, container, anchor = null) {
     prevVNode = null;
   }
   const { shapeFlag } = vnode;
+
   if(shapeFlag & ShapeFlags.COMPONENT){
     processComponent(prevVNode, vnode, container, anchor);
   } else if(shapeFlag & ShapeFlags.TEXT){
@@ -211,7 +213,6 @@ function unmountFragement(vNode) {
 }
 
 function unmountComponent(vNode) {
-// todo
   unmount(vNode.component.subtree);
 }
 

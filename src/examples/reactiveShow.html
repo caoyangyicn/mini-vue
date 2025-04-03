@@ -5,6 +5,31 @@
   <title>Title</title>
 </head>
 <body>
+  <div id="app">
+    <div>{{count.value}}</div>
+    <button @click="add">click</button>
+  </div>
   <script type="text/javascript" src="/dist/mini-vue.js"></script>
+  <script type="text/javascript">
+      const {createApp, ref} = MiniVue;
+      createApp({
+        data() {
+          return {
+            count: 0,
+          };
+        },
+        setup(){
+          const count = ref(0);
+          const add = () => {
+            count.value++;
+          }
+          return {
+            count,
+            add,
+          }
+        },
+      }).mount('#app');
+
+  </script>
 </body>
 </html>
